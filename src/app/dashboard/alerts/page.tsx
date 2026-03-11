@@ -78,15 +78,15 @@ export default function AlertsPage() {
   const unread = alerts.filter(a => !a.is_read).length;
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 md:p-8 max-w-3xl mx-auto space-y-4 sm:space-y-6 pt-16 md:pt-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)] flex items-center gap-3">
-            <Bell size={24} className="text-[var(--color-accent)]" />
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--color-text-primary)] flex items-center gap-3">
+            <Bell size={20} className="text-[var(--color-accent)] sm:w-6 sm:h-6" />
             Alertas Inteligentes
           </h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
             {unread > 0 ? `${unread} sin leer` : "Todas leídas"} · {alerts.length} total
           </p>
         </div>

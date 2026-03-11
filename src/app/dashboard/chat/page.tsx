@@ -118,20 +118,20 @@ export default function AIChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-[100dvh] md:h-screen">
       {/* Header */}
-      <div className="border-b border-[var(--color-border-default)] px-6 py-4 glass flex items-center gap-3">
-        <div className="w-9 h-9 gradient-accent rounded-xl flex items-center justify-center shadow-lg">
-          <Sparkles size={18} className="text-[var(--color-bg-primary)]" />
+      <div className="border-b border-[var(--color-border-default)] px-4 sm:px-6 py-3 sm:py-4 glass flex items-center gap-3 pt-14 md:pt-4">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 gradient-accent rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+          <Sparkles size={16} className="text-[var(--color-bg-primary)] sm:w-[18px] sm:h-[18px]" />
         </div>
-        <div>
-          <h1 className="text-base font-semibold text-[var(--color-text-primary)]">AI Sales Advisor</h1>
-          <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Powered by GPT-4o • Contexto: tu inventario + mercado</p>
+        <div className="min-w-0">
+          <h1 className="text-sm sm:text-base font-semibold text-[var(--color-text-primary)]">AI Sales Advisor</h1>
+          <p className="text-[9px] sm:text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider truncate">Powered by GPT-4o • Contexto: tu inventario + mercado</p>
         </div>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
         <div className="max-w-3xl mx-auto space-y-6">
           <AnimatePresence initial={false}>
             {messages.map((msg) => (
@@ -156,7 +156,7 @@ export default function AIChatPage() {
                 </div>
 
                 {/* Bubble + Properties */}
-                <div className={`flex flex-col gap-3 max-w-[80%] ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                <div className={`flex flex-col gap-2 sm:gap-3 max-w-[85%] sm:max-w-[80%] ${msg.role === "user" ? "items-end" : "items-start"}`}>
                   <div className={`px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                     msg.role === "user" ? "chat-bubble-user" : "chat-bubble-bot"
                   }`}>
@@ -234,7 +234,7 @@ export default function AIChatPage() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-[var(--color-border-default)] p-4 sm:p-6 glass">
+      <div className="border-t border-[var(--color-border-default)] p-3 sm:p-4 md:p-6 glass">
         <div className="max-w-3xl mx-auto relative">
           <textarea
             ref={textareaRef}

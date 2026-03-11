@@ -23,37 +23,25 @@ export function getSupabase(): SupabaseClient | null {
 }
 
 /**
- * Legacy export for backward compat.
- * Uses a getter that lazily initializes the client on first access.
+ * Legacy export — lazily delegates everything to the singleton client.
  * Components should null-check: `if (!supabase) return;`
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let _supabaseProxy: any = null;
-
-Object.defineProperty(module, "supabase_lazy", {
-  get: () => getSupabase(),
-});
-
-export const supabase = typeof window === "undefined"
-  ? null
-  : (() => {
-      // Return a Proxy that delegates all calls to the lazily-initialized client
-      if (!_supabaseProxy) {
-        _supabaseProxy = new Proxy(
-          {},
-          {
-            get(_, prop) {
-              const client = getSupabase();
-              if (!client) return undefined;
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const val = (client as any)[prop];
-              return typeof val === "function" ? val.bind(client) : val;
-            },
-          }
-        );
-      }
-      return _supabaseProxy;
-    })() as SupabaseClient | null;
+export const supabase: SupabaseClient | null =
+  typeof window === "undefined"
+    ? null
+    : (new Proxy(
+        {},
+        {
+          get(_, prop) {
+            const client = getSupabase();
+            if (!client) return undefined;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const val = (client as any)[prop];
+            return typeof val === "function" ? val.bind(client) : val;
+          },
+        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ) as any);
 
 /**
  * Server-side Supabase client with service role key.

@@ -72,25 +72,25 @@ export default function DealTrackerPage() {
   const wonValue = deals.filter((d) => d.stage === "closed_won").reduce((sum, d) => sum + (d.deal_value || 0), 0);
 
   return (
-    <div className="p-6 md:p-8 max-w-full mx-auto space-y-6">
+    <div className="p-4 sm:p-6 md:p-8 max-w-full mx-auto space-y-4 sm:space-y-6 pt-16 md:pt-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)] flex items-center gap-3">
-            <KanbanSquare size={24} className="text-[var(--color-accent)]" />
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--color-text-primary)] flex items-center gap-3">
+            <KanbanSquare size={20} className="text-[var(--color-accent)] sm:w-6 sm:h-6" />
             Deal Tracker
           </h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">Pipeline de ventas inmobiliarias</p>
+          <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">Pipeline de ventas inmobiliarias</p>
         </div>
-        <div className="hidden sm:flex items-center gap-4">
+        <div className="flex items-center gap-4">
           <div className="text-right">
             <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Pipeline Activo</p>
-            <p className="text-lg font-bold text-[var(--color-accent)]">{formatPrice(totalValue)}</p>
+            <p className="text-base sm:text-lg font-bold text-[var(--color-accent)]">{formatPrice(totalValue)}</p>
           </div>
-          <div className="w-px h-10 bg-[var(--color-border-default)]" />
+          <div className="w-px h-8 sm:h-10 bg-[var(--color-border-default)]" />
           <div className="text-right">
             <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Cerrados</p>
-            <p className="text-lg font-bold text-[var(--color-success)]">{formatPrice(wonValue)}</p>
+            <p className="text-base sm:text-lg font-bold text-[var(--color-success)]">{formatPrice(wonValue)}</p>
           </div>
         </div>
       </div>
@@ -117,7 +117,7 @@ export default function DealTrackerPage() {
       </div>
 
       {/* Kanban Board */}
-      <div className="flex gap-4 overflow-x-auto pb-6 min-h-[500px]">
+      <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-6 min-h-[400px] sm:min-h-[500px] -mx-4 px-4 sm:mx-0 sm:px-0">
         {dealsByStage.map((stageData, si) => (
           <motion.div
             key={stageData.key}

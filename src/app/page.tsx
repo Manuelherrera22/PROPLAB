@@ -13,7 +13,7 @@ const features = [
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden gradient-bg px-6">
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden gradient-bg px-4 sm:px-6 py-12 sm:py-0">
       {/* Background effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--color-accent)] opacity-[0.03] rounded-full blur-3xl" />
@@ -31,12 +31,12 @@ export default function LandingPage() {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="flex items-center justify-center gap-4 mb-8"
+          className="flex items-center justify-center gap-3 sm:gap-4 mb-6 sm:mb-8"
         >
-          <div className="w-14 h-14 gradient-accent rounded-2xl flex items-center justify-center shadow-lg accent-glow">
-            <Building2 size={28} className="text-[var(--color-bg-primary)]" />
+          <div className="w-12 h-12 sm:w-14 sm:h-14 gradient-accent rounded-2xl flex items-center justify-center shadow-lg accent-glow">
+            <Building2 size={24} className="text-[var(--color-bg-primary)] sm:w-7 sm:h-7" />
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
             PROP<span className="text-[var(--color-accent)]">LAB</span>
           </h1>
         </motion.div>
@@ -70,7 +70,7 @@ export default function LandingPage() {
         >
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-3 px-8 py-4 gradient-accent rounded-2xl text-[var(--color-bg-primary)] font-semibold text-base shadow-lg hover:shadow-[0_0_30px_rgba(212,168,83,0.25)] transition-all duration-300 group"
+            className="inline-flex items-center gap-3 px-6 sm:px-8 py-3.5 sm:py-4 gradient-accent rounded-2xl text-[var(--color-bg-primary)] font-semibold text-sm sm:text-base shadow-lg hover:shadow-[0_0_30px_rgba(212,168,83,0.25)] transition-all duration-300 group"
           >
             Entrar al Dashboard
             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -83,7 +83,7 @@ export default function LandingPage() {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1, duration: 0.8 }}
-        className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-20 max-w-5xl w-full"
+        className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-12 sm:mt-20 max-w-5xl w-full"
       >
         {features.map((f, i) => (
           <motion.div

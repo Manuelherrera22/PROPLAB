@@ -100,15 +100,15 @@ export default function MarketIntelPage() {
   const filteredOpportunities = filter === "all" ? opportunities : opportunities.filter((o) => o.property_type === filter);
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 pt-16 md:pt-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">Market Intelligence</h1>
-        <p className="text-sm text-[var(--color-text-muted)] mt-1">Mapa de calor, oportunidades y análisis por zona</p>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">Market Intelligence</h1>
+        <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">Mapa de calor, oportunidades y análisis por zona</p>
       </div>
 
       {/* Top Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: "Propiedades Propias", value: properties.length, icon: Building2, color: "var(--color-accent)" },
           { label: "Listados del Mercado", value: marketListings.length, icon: BarChart3, color: "var(--color-info)" },
@@ -162,12 +162,12 @@ export default function MarketIntelPage() {
             </div>
           </div>
         </div>
-        <div className="h-[400px]">
+        <div className="h-[250px] sm:h-[350px] lg:h-[400px]">
           <MapView points={mapPoints} />
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Opportunity Scanner */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

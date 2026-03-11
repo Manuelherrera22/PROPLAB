@@ -245,6 +245,69 @@ body {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ===== RESPONSIVE ===== */
+
+/* Mobile: < 640px */
+@media (max-width: 639px) {
+  :root {
+    --sidebar-width: 280px;
+  }
+
+  .kpi-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .glass-card {
+    border-radius: 12px;
+  }
+
+  .kanban-column {
+    min-width: 260px;
+    padding: 12px;
+    border-radius: 12px;
+    min-height: 300px;
+  }
+
+  .input-field {
+    padding: 12px 14px;
+    font-size: 16px; /* Prevent iOS zoom on focus */
+    border-radius: 12px;
+  }
+
+  .empty-state {
+    padding: 32px 16px;
+  }
+
+  .chat-bubble-bot,
+  .chat-bubble-user {
+    border-radius: 12px;
+  }
+
+  .chat-bubble-bot { border-top-left-radius: 2px; }
+  .chat-bubble-user { border-top-right-radius: 2px; }
+}
+
+/* Tablet: 640px - 1023px */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kanban-column {
+    min-width: 240px;
+  }
+}
+
+/* Touch-friendly: larger tap targets on mobile/tablet */
+@media (hover: none) and (pointer: coarse) {
+  .kpi-card:hover {
+    transform: none;
+  }
+
+  .glass-card:hover {
+    border-color: var(--color-border-default);
+    box-shadow: var(--shadow-card);
+  }
 }

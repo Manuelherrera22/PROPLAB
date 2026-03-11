@@ -106,14 +106,14 @@ export default function CommandCenter() {
   ];
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 pt-16 md:pt-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--color-text-primary)]">
             Command Center
           </h1>
-          <p className="text-sm text-[var(--color-text-muted)] mt-1">
+          <p className="text-xs sm:text-sm text-[var(--color-text-muted)] mt-1">
             Vista general de tu operación inmobiliaria
           </p>
         </div>
@@ -127,7 +127,7 @@ export default function CommandCenter() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {kpis.map((kpi, i) => (
           <motion.div
             key={kpi.label}
@@ -151,14 +151,14 @@ export default function CommandCenter() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Properties Grid — 2/3 width */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Propiedades Recientes</h2>
             <span className="text-xs text-[var(--color-text-muted)]">{properties.length} total</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {properties.slice(0, 4).map((prop, i) => (
               <motion.div
                 key={prop.id}
@@ -167,7 +167,7 @@ export default function CommandCenter() {
                 transition={{ delay: 0.3 + i * 0.08 }}
                 className="glass-card overflow-hidden group cursor-pointer"
               >
-                <div className="relative h-36 bg-[var(--color-bg-hover)] overflow-hidden">
+                <div className="relative h-32 sm:h-36 bg-[var(--color-bg-hover)] overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={prop.image_url}
