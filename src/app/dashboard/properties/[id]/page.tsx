@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { getSupabase } from "@/lib/supabase";
 import { useStore, type Property, type MarketListing } from "@/store/useStore";
 import {
@@ -20,6 +20,10 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  ExternalLink,
+  ImageIcon,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -65,6 +69,7 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState<Property | null>(null);
   const [comparables, setComparables] = useState<MarketListing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
 
   useEffect(() => {
     const sb = getSupabase();
@@ -123,6 +128,17 @@ export default function PropertyDetailPage() {
   const isBelow = priceDiffPct < -5;
   const isAbove = priceDiffPct > 5;
 
+  // Build gallery: use gallery array if available, otherwise just main image
+  const gallery: string[] = (p.gallery && p.gallery.length > 0)
+    ? p.gallery
+    : (p.image_url && p.image_url.startsWith("http")) ? [p.image_url] : [];
+
+  const hasGallery = gallery.length > 0;
+  const currentImage = gallery[activeImageIdx] || "";
+
+  const nextImage = () => setActiveImageIdx((prev) => (prev + 1) % gallery.length);
+  const prevImage = () => setActiveImageIdx((prev) => (prev - 1 + gallery.length) % gallery.length);
+
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-5xl mx-auto space-y-6 pt-16 md:pt-8">
       {/* Back Button */}
@@ -134,8 +150,124 @@ export default function PropertyDetailPage() {
         Volver
       </button>
 
+      {/* Photo Gallery */}
+      {hasGallery ? (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card overflow-hidden">
+          {/* Main Image */}
+          <div className="relative h-64 sm:h-80 md:h-96 bg-[var(--color-bg-hover)] overflow-hidden group">
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={activeImageIdx}
+                src={currentImage}
+                alt={`${p.title} - Foto ${activeImageIdx + 1}`}
+                className="object-cover w-full h-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                }}
+              />
+            </AnimatePresence>
+
+            {/* Navigation Arrows */}
+            {gallery.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+
+            {/* Photo Counter */}
+            <div className="absolute bottom-3 right-3 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-xs text-white flex items-center gap-1.5">
+              <ImageIcon size={12} />
+              {activeImageIdx + 1} / {gallery.length}
+            </div>
+
+            {/* Price Badge */}
+            <div className="absolute top-3 left-3 px-3 py-1.5 bg-black/70 backdrop-blur-md rounded-xl text-sm font-bold text-white border border-white/10 shadow-lg">
+              ${p.price.toLocaleString()}
+            </div>
+
+            {/* Status Badge */}
+            <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-lg text-xs font-semibold uppercase tracking-wider`}
+              style={{ background: badge.bg, color: badge.color }}
+            >
+              {badge.label}
+            </div>
+
+            {/* Source Link */}
+            {p.source_url && (
+              <a
+                href={p.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-3 left-3 px-3 py-1.5 bg-black/60 backdrop-blur-sm rounded-lg text-[11px] text-white/80 flex items-center gap-1.5 hover:text-white transition-colors"
+              >
+                <ExternalLink size={11} />
+                Ver anuncio original
+              </a>
+            )}
+          </div>
+
+          {/* Thumbnail Strip */}
+          {gallery.length > 1 && (
+            <div className="flex gap-1.5 p-3 overflow-x-auto bg-[var(--color-bg-secondary)]">
+              {gallery.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveImageIdx(idx)}
+                  className={`relative flex-shrink-0 w-16 h-12 sm:w-20 sm:h-14 rounded-lg overflow-hidden transition-all ${
+                    idx === activeImageIdx
+                      ? "ring-2 ring-[var(--color-accent)] opacity-100 scale-105"
+                      : "opacity-50 hover:opacity-80"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img}
+                    alt={`Foto ${idx + 1}`}
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).parentElement!.style.display = "none";
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      ) : (
+        /* No Photos Fallback */
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          className="glass-card h-48 flex items-center justify-center"
+          style={{
+            background: p.property_type === "house" ? "linear-gradient(135deg, #1a3a2a 0%, #0d1f15 100%)" :
+              p.property_type === "apartment" ? "linear-gradient(135deg, #1a2a3a 0%, #0d1520 100%)" :
+              p.property_type === "penthouse" ? "linear-gradient(135deg, #2a1a3a 0%, #150d20 100%)" :
+              "linear-gradient(135deg, #2a3a1a 0%, #151f0d 100%)"
+          }}
+        >
+          <div className="text-center">
+            <span className="text-5xl opacity-30">{typeIcon(p.property_type)}</span>
+            <p className="text-xs text-[var(--color-text-muted)] mt-2">Sin fotos disponibles</p>
+          </div>
+        </motion.div>
+      )}
+
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-5 sm:p-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="text-4xl">{typeIcon(p.property_type)}</div>
@@ -150,7 +282,17 @@ export default function PropertyDetailPage() {
                   {badge.label}
                 </span>
                 <span className="text-xs text-[var(--color-text-muted)]">{typeLabel(p.property_type)}</span>
+                {p.source && (
+                  <span className="text-[10px] text-[var(--color-text-muted)] px-1.5 py-0.5 rounded bg-[var(--color-bg-hover)]">
+                    📡 {p.source}
+                  </span>
+                )}
               </div>
+              {p.description && (
+                <p className="text-sm text-[var(--color-text-secondary)] mt-3 leading-relaxed max-w-xl">
+                  {p.description}
+                </p>
+              )}
             </div>
           </div>
           <div className="text-right">
@@ -161,7 +303,7 @@ export default function PropertyDetailPage() {
       </motion.div>
 
       {/* Key Metrics */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {p.property_type !== "land" && (
           <>
             <div className="kpi-card">
@@ -259,6 +401,7 @@ export default function PropertyDetailPage() {
               {p.status === "available" && <li>✓ Disponible para compra inmediata</li>}
               {p.city && <li>✓ Ubicación en {p.city} — zona de alta demanda</li>}
               {(p.price_per_m2 || 0) < 1000 && <li>✓ Precio/m² accesible (${p.price_per_m2}/m²)</li>}
+              {gallery.length > 3 && <li>✓ {gallery.length} fotos reales del inmueble</li>}
             </ul>
           </div>
 
@@ -273,6 +416,7 @@ export default function PropertyDetailPage() {
               {p.status === "sold" && <li>⚠ Propiedad ya vendida</li>}
               {p.property_type === "land" && <li>⚠ Terreno — requiere inversión de construcción adicional</li>}
               {comparables.length === 0 && <li>⚠ Sin datos comparativos en la zona</li>}
+              {gallery.length <= 1 && <li>⚠ Pocas fotos disponibles — verificar en sitio</li>}
               <li>⚠ Verificar documentación legal y escrituración</li>
               <li>⚠ Inspección física recomendada antes de oferta</li>
             </ul>
@@ -308,7 +452,7 @@ export default function PropertyDetailPage() {
                         <span className="text-[var(--color-text-primary)] truncate max-w-[200px]">{c.title}</span>
                       </div>
                     </td>
-                    <td className="py-2.5 pr-4 text-[var(--color-text-primary)] font-medium">{formatPrice(c.price)}</td>
+                    <td className="py-2.5 pr-4 text-[var(--color-text-primary)] font-medium">{formatPrice(c.price || 0)}</td>
                     <td className={`py-2.5 pr-4 font-medium ${(c.price_per_m2 || 0) < (p.price_per_m2 || 0) ? "text-[var(--color-success)]" : "text-[var(--color-text-secondary)]"}`}>
                       ${(c.price_per_m2 || 0).toLocaleString()}
                     </td>

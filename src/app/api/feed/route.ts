@@ -20,23 +20,6 @@ const cities = [
 
 const portals = ["Properati", "OLX", "Plusvalía", "Inmuebles24", "Encuentra24"];
 const types = ["house", "apartment", "land", "penthouse"];
-const images = [
-  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600",
-  "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600",
-  "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600",
-  "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=600",
-  "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=600",
-  "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600",
-  "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600",
-  "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600",
-  "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=600",
-  "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=600",
-  "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?w=600",
-  "https://images.unsplash.com/photo-1615571022219-eb45cf7faa36?w=600",
-  "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600",
-];
 
 const names = [
   "Alejandro Torres","Sofía Mendoza","Juan Carlos Vega","Camila Arévalo","Ricardo Espinoza",
