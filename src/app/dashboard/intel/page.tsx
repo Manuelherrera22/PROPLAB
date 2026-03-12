@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useStore, type MarketListing, type Property } from "@/store/useStore";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import {
   MapPin,
@@ -40,11 +40,12 @@ export default function MarketIntelPage() {
   const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
-    if (!supabase) return;
+    const sb = getSupabase();
+    if (!sb) return;
     async function load() {
       const [propsRes, marketRes] = await Promise.all([
-        supabase!.from("properties").select("*").eq("workspace_id", workspaceId),
-        supabase!.from("market_listings").select("*").eq("workspace_id", workspaceId).order("scraped_at", { ascending: false }),
+        sb!.from("properties").select("*").eq("workspace_id", workspaceId),
+        sb!.from("market_listings").select("*").eq("workspace_id", workspaceId).order("scraped_at", { ascending: false }),
       ]);
       if (propsRes.data) setProperties(propsRes.data as Property[]);
       if (marketRes.data) setMarketListings(marketRes.data as MarketListing[]);

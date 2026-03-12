@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useStore, type Deal } from "@/store/useStore";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import {
   KanbanSquare,
   Phone,
@@ -44,6 +44,7 @@ export default function DealTrackerPage() {
   const { workspaceId, deals, setDeals } = useStore();
 
   useEffect(() => {
+    const supabase = getSupabase();
     if (!supabase) return;
     async function loadDeals() {
       const { data } = await supabase!
@@ -60,7 +61,7 @@ export default function DealTrackerPage() {
       .on("postgres_changes", { event: "*", schema: "public", table: "deals" }, () => { loadDeals(); })
       .subscribe();
 
-    return () => { supabase?.removeChannel(channel); };
+    return () => { supabase.removeChannel(channel); };
   }, [workspaceId, setDeals]);
 
   const dealsByStage = stages.map((stage) => ({

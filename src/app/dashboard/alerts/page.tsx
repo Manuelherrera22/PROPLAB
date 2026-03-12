@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useStore, type SmartAlert } from "@/store/useStore";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import {
   Bell,
   Target,
@@ -42,6 +42,7 @@ export default function AlertsPage() {
   const { workspaceId, alerts, setAlerts } = useStore();
 
   useEffect(() => {
+    const supabase = getSupabase();
     if (!supabase) return;
     async function loadAlerts() {
       const { data } = await supabase!
@@ -60,16 +61,18 @@ export default function AlertsPage() {
       })
       .subscribe();
 
-    return () => { supabase?.removeChannel(channel); };
+    return () => { supabase.removeChannel(channel); };
   }, [workspaceId, setAlerts]);
 
   const markAsRead = async (id: string) => {
+    const supabase = getSupabase();
     if (!supabase) return;
     await supabase.from("smart_alerts").update({ is_read: true }).eq("id", id);
     setAlerts(alerts.map(a => a.id === id ? { ...a, is_read: true } : a));
   };
 
   const markAllAsRead = async () => {
+    const supabase = getSupabase();
     if (!supabase) return;
     await supabase.from("smart_alerts").update({ is_read: true }).eq("workspace_id", workspaceId).eq("is_read", false);
     setAlerts(alerts.map(a => ({ ...a, is_read: true })));

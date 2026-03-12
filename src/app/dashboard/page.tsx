@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useStore, type Property, type Lead, type Deal, type SmartAlert, type MarketListing } from "@/store/useStore";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 import {
   Building2,
   Users,
@@ -62,36 +62,63 @@ export default function CommandCenter() {
   } = useStore();
 
   useEffect(() => {
-    if (!supabase) return;
+    const sb = getSupabase();
+    if (!sb) {
+      console.warn("[PROPLAB] Supabase client not available");
+      return;
+    }
 
-    async function loadData() {
+    async function loadData(wsId: string) {
+      console.log("[PROPLAB] Loading data for workspace:", wsId);
       const [propsRes, leadsRes, dealsRes, alertsRes, marketRes] = await Promise.all([
-        supabase!.from("properties").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
-        supabase!.from("leads").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
-        supabase!.from("deals").select("*, lead:leads(*), property:properties(*)").eq("workspace_id", workspaceId).order("created_at", { ascending: false }),
-        supabase!.from("smart_alerts").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).limit(5),
-        supabase!.from("market_listings").select("*").eq("workspace_id", workspaceId).order("scraped_at", { ascending: false }),
+        sb!.from("properties").select("*").eq("workspace_id", wsId).order("created_at", { ascending: false }),
+        sb!.from("leads").select("*").eq("workspace_id", wsId).order("created_at", { ascending: false }),
+        sb!.from("deals").select("*, lead:leads(*), property:properties(*)").eq("workspace_id", wsId).order("created_at", { ascending: false }),
+        sb!.from("smart_alerts").select("*").eq("workspace_id", wsId).order("created_at", { ascending: false }).limit(5),
+        sb!.from("market_listings").select("*").eq("workspace_id", wsId).order("scraped_at", { ascending: false }),
       ]);
+      console.log("[PROPLAB] Data loaded:", {
+        properties: propsRes.data?.length ?? 0,
+        leads: leadsRes.data?.length ?? 0,
+        deals: dealsRes.data?.length ?? 0,
+        alerts: alertsRes.data?.length ?? 0,
+        market: marketRes.data?.length ?? 0,
+        errors: [propsRes.error, leadsRes.error, dealsRes.error, alertsRes.error, marketRes.error].filter(Boolean),
+      });
       if (propsRes.data) setProperties(propsRes.data as Property[]);
       if (leadsRes.data) setLeads(leadsRes.data as Lead[]);
       if (dealsRes.data) setDeals(dealsRes.data as Deal[]);
       if (alertsRes.data) setAlerts(alertsRes.data as SmartAlert[]);
       if (marketRes.data) setMarketListings(marketRes.data as MarketListing[]);
+      return propsRes.data?.length ?? 0;
     }
-    loadData();
+
+    // Try loading with current workspaceId; if 0 results, auto-detect
+    loadData(workspaceId).then(async (count) => {
+      if (count === 0) {
+        console.log("[PROPLAB] No data for stored workspace, auto-detecting...");
+        const { data: workspaces } = await sb!.from("workspaces").select("id, name").limit(1);
+        if (workspaces && workspaces.length > 0) {
+          const ws = workspaces[0];
+          console.log("[PROPLAB] Auto-detected workspace:", ws.name, ws.id);
+          useStore.getState().setWorkspace(ws.id, ws.name);
+          // Data will reload via dependency change
+        }
+      }
+    });
 
     // Realtime subscriptions
-    const channel = supabase
+    const channel = sb
       .channel("dashboard-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, () => {
-        supabase!.from("leads").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).then(r => { if (r.data) setLeads(r.data as Lead[]); });
+        sb!.from("leads").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).then(r => { if (r.data) setLeads(r.data as Lead[]); });
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "smart_alerts" }, () => {
-        supabase!.from("smart_alerts").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).limit(5).then(r => { if (r.data) setAlerts(r.data as SmartAlert[]); });
+        sb!.from("smart_alerts").select("*").eq("workspace_id", workspaceId).order("created_at", { ascending: false }).limit(5).then(r => { if (r.data) setAlerts(r.data as SmartAlert[]); });
       })
       .subscribe();
 
-    return () => { supabase?.removeChannel(channel); };
+    return () => { sb.removeChannel(channel); };
   }, [workspaceId, setProperties, setLeads, setDeals, setAlerts, setMarketListings]);
 
   const totalPipelineValue = deals.filter(d => !["closed_won", "closed_lost"].includes(d.stage)).reduce((sum, d) => sum + (d.deal_value || 0), 0);
