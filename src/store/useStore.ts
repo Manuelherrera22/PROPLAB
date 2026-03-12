@@ -129,7 +129,7 @@ export const useStore = create<PropLabStore>()(
   persist(
     (set) => ({
       workspaceId: "ae5d1008-34b9-42d4-9522-f0f4edf1c91f",
-      workspaceName: "Guayaquil Premium",
+      workspaceName: "Ecuador Intelligence",
       setWorkspace: (id, name) => set({ workspaceId: id, workspaceName: name }),
 
       properties: [],
