@@ -187,61 +187,65 @@ export default function CommandCenter() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {properties.slice(0, 4).map((prop, i) => (
-              <motion.div
-                key={prop.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 + i * 0.08 }}
-                className="glass-card overflow-hidden group cursor-pointer"
-              >
-                <div className="relative h-32 sm:h-36 bg-[var(--color-bg-hover)] overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={prop.image_url}
-                    alt={prop.title}
-                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-xs font-bold text-white border border-white/10">
-                    {formatPrice(prop.price)}
+              <Link key={prop.id} href={`/dashboard/properties/${prop.id}`}>
+                <motion.div
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + i * 0.08 }}
+                  className="glass-card overflow-hidden group cursor-pointer"
+                >
+                  <div className="relative h-32 sm:h-36 overflow-hidden flex items-center justify-center" style={{
+                    background: prop.property_type === "house" ? "linear-gradient(135deg, #1a3a2a 0%, #0d1f15 100%)" :
+                      prop.property_type === "apartment" ? "linear-gradient(135deg, #1a2a3a 0%, #0d1520 100%)" :
+                      prop.property_type === "penthouse" ? "linear-gradient(135deg, #2a1a3a 0%, #150d20 100%)" :
+                      "linear-gradient(135deg, #2a3a1a 0%, #151f0d 100%)"
+                  }}>
+                    <span className="text-5xl opacity-40 group-hover:scale-110 transition-transform duration-500">
+                      {prop.property_type === "house" ? "🏠" : prop.property_type === "apartment" ? "🏢" : prop.property_type === "penthouse" ? "🏙️" : "🌿"}
+                    </span>
+                    <span className="absolute bottom-2 left-3 text-[10px] text-white/30 font-medium tracking-wider uppercase">{prop.city || prop.location}</span>
+                    <div className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-xs font-bold text-white border border-white/10">
+                      {formatPrice(prop.price)}
+                    </div>
+                    <div className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${
+                      prop.status === "available" ? "bg-[var(--color-success-muted)] text-[var(--color-success)]" :
+                      prop.status === "reserved" ? "bg-[var(--color-warning-muted)] text-[var(--color-warning)]" :
+                      "bg-[var(--color-danger-muted)] text-[var(--color-danger)]"
+                    }`}>
+                      {prop.status === "available" ? "Disponible" : prop.status === "reserved" ? "Reservada" : "Vendida"}
+                    </div>
                   </div>
-                  <div className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider ${
-                    prop.status === "available" ? "bg-[var(--color-success-muted)] text-[var(--color-success)]" :
-                    prop.status === "reserved" ? "bg-[var(--color-warning-muted)] text-[var(--color-warning)]" :
-                    "bg-[var(--color-danger-muted)] text-[var(--color-danger)]"
-                  }`}>
-                    {prop.status === "available" ? "Disponible" : prop.status === "reserved" ? "Reservada" : "Vendida"}
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors truncate">
-                    {prop.title}
-                  </h3>
-                  <div className="flex items-center gap-1.5 mt-1.5 text-[var(--color-text-muted)] text-xs">
-                    <MapPin size={12} />
-                    <span className="truncate">{prop.location}</span>
-                  </div>
-                  <div className="flex items-center gap-3 mt-3 text-xs text-[var(--color-text-secondary)]">
-                    {prop.bedrooms > 0 && (
-                      <div className="flex items-center gap-1">
-                        <BedDouble size={12} className="text-[var(--color-accent)]" />
-                        {prop.bedrooms}
-                      </div>
-                    )}
-                    {prop.area_m2 && (
-                      <div className="flex items-center gap-1">
-                        <Eye size={12} className="text-[var(--color-info)]" />
-                        {prop.area_m2}m²
-                      </div>
-                    )}
-                    {prop.price_per_m2 && (
-                      <div className="flex items-center gap-1">
-                        <DollarSign size={12} className="text-[var(--color-success)]" />
-                        {prop.price_per_m2}/m²
-                      </div>
-                    )}
+                  <div className="p-4">
+                    <h3 className="font-semibold text-sm text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)] transition-colors truncate">
+                      {prop.title}
+                    </h3>
+                    <div className="flex items-center gap-1.5 mt-1.5 text-[var(--color-text-muted)] text-xs">
+                      <MapPin size={12} />
+                      <span className="truncate">{prop.location}</span>
+                    </div>
+                    <div className="flex items-center gap-3 mt-3 text-xs text-[var(--color-text-secondary)]">
+                      {prop.bedrooms > 0 && (
+                        <div className="flex items-center gap-1">
+                          <BedDouble size={12} className="text-[var(--color-accent)]" />
+                          {prop.bedrooms}
+                        </div>
+                      )}
+                      {prop.area_m2 && (
+                        <div className="flex items-center gap-1">
+                          <Eye size={12} className="text-[var(--color-info)]" />
+                          {prop.area_m2}m²
+                        </div>
+                      )}
+                      {prop.price_per_m2 && (
+                        <div className="flex items-center gap-1">
+                          <DollarSign size={12} className="text-[var(--color-success)]" />
+                          {prop.price_per_m2}/m²
+                        </div>
+                      )}
                   </div>
                 </div>
               </motion.div>
+              </Link>
             ))}
           </div>
         </div>
