@@ -139,7 +139,7 @@ export default function MapView({
               weight: 2,
             }}
           >
-            <Popup maxWidth={320} minWidth={isRich ? 280 : 180}>
+            <Popup maxWidth={300} minWidth={isRich ? 240 : 140}>
               <div
                 style={{
                   color: "#fff",
@@ -147,7 +147,7 @@ export default function MapView({
                   borderRadius: "12px",
                   border: "1px solid rgba(255,255,255,0.08)",
                   overflow: "hidden",
-                  minWidth: isRich ? "280px" : "150px",
+                  maxWidth: "calc(100vw - 60px)",
                 }}
               >
                 {/* Photo */}
@@ -155,7 +155,7 @@ export default function MapView({
                   <div
                     style={{
                       position: "relative",
-                      height: "140px",
+                      height: "120px",
                       overflow: "hidden",
                       background: "#0d0d14",
                     }}

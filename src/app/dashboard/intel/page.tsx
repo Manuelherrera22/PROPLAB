@@ -67,7 +67,7 @@ export default function MarketIntelPage() {
   const [filterMaxPrice, setFilterMaxPrice] = useState<string>("");
   const [filterOnlyOpportunities, setFilterOnlyOpportunities] = useState(false);
   const [filterMinScore, setFilterMinScore] = useState<string>("");
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     const sb = getSupabase();
