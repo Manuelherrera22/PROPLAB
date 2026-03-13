@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import { useStore } from "@/store/useStore";
 
-const FEED_INTERVAL = 2 * 60 * 1000; // 2 minutes
+// Auto-scrape real market data every 10 minutes
+const FEED_INTERVAL = 10 * 60 * 1000;
 
 export default function AutoFeed() {
   const { workspaceId } = useStore();
@@ -26,12 +27,12 @@ export default function AutoFeed() {
       }
     }
 
-    // First feed after 30s
+    // First feed after 60s (gives user time to see initial state)
     const initial = setTimeout(() => {
       feed();
-      // Then every 2 minutes
+      // Then every 10 minutes
       intervalRef.current = setInterval(feed, FEED_INTERVAL);
-    }, 30_000);
+    }, 60_000);
 
     return () => {
       clearTimeout(initial);
