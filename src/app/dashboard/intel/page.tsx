@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useStore, type MarketListing, type Property } from "@/store/useStore";
 import { getSupabase } from "@/lib/supabase";
@@ -39,6 +39,20 @@ function formatPrice(n: number) {
   return `$${n}`;
 }
 
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function formatDistance(km: number): string {
+  if (km < 1) return `${Math.round(km * 1000)}m`;
+  if (km < 10) return `${km.toFixed(1)}km`;
+  return `${Math.round(km)}km`;
+}
+
 // Ecuador provinces and their main cities
 const PROVINCE_CITY_MAP: Record<string, string[]> = {
   "Guayas": ["Guayaquil", "Samborondón", "Durán", "Playas"],
@@ -68,6 +82,15 @@ export default function MarketIntelPage() {
   const [filterOnlyOpportunities, setFilterOnlyOpportunities] = useState(false);
   const [filterMinScore, setFilterMinScore] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+
+  const handleLocationChange = useCallback((lat: number, lng: number) => {
+    if (lat === 0 && lng === 0) {
+      setUserLocation(null);
+    } else {
+      setUserLocation([lat, lng]);
+    }
+  }, []);
 
   useEffect(() => {
     const sb = getSupabase();
@@ -445,7 +468,7 @@ export default function MarketIntelPage() {
           </div>
         </div>
         <div className="h-[300px] sm:h-[400px] lg:h-[500px]">
-          <MapView points={mapPoints} />
+          <MapView points={mapPoints} onLocationChange={handleLocationChange} />
         </div>
       </motion.div>
 
@@ -460,9 +483,15 @@ export default function MarketIntelPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-[var(--color-text-primary)] flex items-center gap-2">
               <Flame size={16} className="text-[var(--color-warning)]" />
-              Oportunidades Detectadas
+              {userLocation ? "Cerca de Ti" : "Oportunidades Detectadas"}
               <span className="text-[10px] font-normal text-[var(--color-text-muted)]">({opportunities.length})</span>
             </h2>
+            {userLocation && (
+              <span className="text-[10px] text-[var(--color-success)] font-semibold flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)] animate-pulse" />
+                GPS
+              </span>
+            )}
           </div>
           {opportunities.length === 0 ? (
             <div className="text-center py-8">
@@ -473,16 +502,32 @@ export default function MarketIntelPage() {
             </div>
           ) : (
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
-              {opportunities.map((opp) => (
+              {[...opportunities]
+                .map((opp) => ({
+                  ...opp,
+                  _dist: userLocation && opp.latitude && opp.longitude
+                    ? haversineKm(userLocation[0], userLocation[1], opp.latitude, opp.longitude)
+                    : undefined,
+                }))
+                .sort((a, b) => {
+                  if (a._dist !== undefined && b._dist !== undefined) return a._dist - b._dist;
+                  return (b.opportunity_score || 0) - (a.opportunity_score || 0);
+                })
+                .map((opp) => (
                 <div key={opp.id} className="flex items-center justify-between p-3 rounded-xl bg-[var(--color-bg-hover)] border border-[var(--color-border-default)] hover:border-[var(--color-warning)] hover:border-opacity-30 transition-colors">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-[var(--color-text-primary)] truncate">{opp.title}</p>
-                    <div className="flex items-center gap-3 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      {opp._dist !== undefined && (
+                        <span className="text-[10px] text-[var(--color-success)] font-semibold flex items-center gap-1">
+                          📍 {formatDistance(opp._dist)}
+                        </span>
+                      )}
                       <span className="text-[10px] text-[var(--color-text-muted)] flex items-center gap-1">
                         <MapPin size={10} /> {opp.city || opp.location}
                       </span>
                       <span className="text-[10px] text-[var(--color-text-muted)] flex items-center gap-1">
-                        <Clock size={10} /> {opp.days_on_market}d en mercado
+                        <Clock size={10} /> {opp.days_on_market}d
                       </span>
                     </div>
                     {/* Mini score bar */}
