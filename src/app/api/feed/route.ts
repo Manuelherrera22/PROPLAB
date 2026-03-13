@@ -73,7 +73,13 @@ async function scrapeMarketListings(city: { name: string; lat: number; lng: numb
       else if (pt.includes("penthouse")) type = "penthouse";
 
       const pricePerM2 = area > 0 ? Math.round(price / area) : 0;
-      const thumb = (item.thumbnail || "").replace("http://", "https://").replace("-I.jpg", "-O.jpg");
+      const rawThumb = (item.thumbnail || "").replace("http://", "https://").replace("-I.jpg", "-O.jpg");
+
+      // Filter out MercadoLibre placeholder/logo images
+      const isPlaceholder = !rawThumb || rawThumb.includes("resources.mlstatic.com") ||
+        rawThumb.includes("/resources/") || rawThumb.includes("logo") ||
+        rawThumb.includes("_noimage") || rawThumb.includes("no-image") || rawThumb.length < 20;
+      const thumb = isPlaceholder ? "" : rawThumb;
 
       // Real opportunity detection based on market heuristics
       const avgPricePerM2ForType: Record<string, number> = {

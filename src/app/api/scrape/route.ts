@@ -77,6 +77,25 @@ async function fetchItemDetails(itemId: string): Promise<{
   }
 }
 
+// Detect MercadoLibre placeholder/logo images
+function isMLPlaceholder(url: string): boolean {
+  if (!url) return true;
+  const lower = url.toLowerCase();
+  return (
+    lower.includes("resources.mlstatic.com") ||
+    lower.includes("/resources/") ||
+    lower.includes("d1wav17xydrih9") ||
+    lower.includes("logo") ||
+    lower.includes("_noimage") ||
+    lower.includes("placeholder") ||
+    lower.includes("default_image") ||
+    lower.includes("no-image") ||
+    lower.endsWith("logo.png") ||
+    lower.endsWith("logo.jpg") ||
+    url.length < 20
+  );
+}
+
 // Source 1: MercadoLibre Ecuador Real Estate API — with FULL gallery
 async function scrapeMercadoLibre(city: string, log: string[]): Promise<ScrapedProperty[]> {
   const results: ScrapedProperty[] = [];
@@ -135,14 +154,14 @@ async function scrapeMercadoLibre(city: string, log: string[]): Promise<ScrapedP
         let description = "";
 
         if (detail && detail.pictures.length > 0) {
-          gallery = detail.pictures;
-          mainImage = gallery[0];
+          gallery = detail.pictures.filter((url: string) => !isMLPlaceholder(url));
+          mainImage = gallery[0] || "";
           permalink = detail.permalink || permalink;
           description = detail.description || "";
         } else {
           // Fallback: use thumbnail in highest resolution
           const thumb = (item.thumbnail || "").replace("http://", "https://");
-          if (thumb) {
+          if (thumb && !isMLPlaceholder(thumb)) {
             mainImage = thumb.replace("-I.jpg", "-O.jpg");
             gallery = [mainImage];
           }

@@ -29,8 +29,12 @@ export default function LandingPage() {
     setIsMobile(mobile);
     setIsIOS(ios);
 
+    // Register service worker for PWA
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch(() => {});
+    }
+
     if (mobile) {
-      // Show install banner after 2 seconds on mobile
       const timer = setTimeout(() => setShowInstallBanner(true), 2000);
       return () => clearTimeout(timer);
     }

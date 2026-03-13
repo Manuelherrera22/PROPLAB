@@ -36,6 +36,20 @@ function formatTimeAgo(dateStr: string) {
   return `hace ${days}d`;
 }
 
+// Detect MercadoLibre placeholder/logo images on the client side
+function isRealImage(url: string | null | undefined): boolean {
+  if (!url || !url.startsWith("http")) return false;
+  const lower = url.toLowerCase();
+  if (lower.includes("resources.mlstatic.com")) return false;
+  if (lower.includes("/resources/")) return false;
+  if (lower.includes("logo")) return false;
+  if (lower.includes("_noimage")) return false;
+  if (lower.includes("no-image")) return false;
+  if (lower.includes("placeholder")) return false;
+  if (lower.includes("unsplash.com")) return false;
+  return true;
+}
+
 const stageLabels: Record<string, string> = {
   new_lead: "Nuevo",
   contacted: "Contactado",
@@ -195,26 +209,29 @@ export default function CommandCenter() {
                   className="glass-card overflow-hidden group cursor-pointer"
                 >
                   <div className="relative h-32 sm:h-36 overflow-hidden bg-[var(--color-bg-hover)]">
-                    {prop.image_url && prop.image_url.startsWith("http") ? (
+                    {isRealImage(prop.image_url) ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={prop.image_url}
                         alt={prop.title}
                         className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                        onError={(e) => {
+                          const el = e.target as HTMLImageElement;
+                          el.style.display = "none";
+                          if (el.nextElementSibling) (el.nextElementSibling as HTMLElement).style.display = "flex";
+                        }}
                       />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center" style={{
-                        background: prop.property_type === "house" ? "linear-gradient(135deg, #1a3a2a 0%, #0d1f15 100%)" :
-                          prop.property_type === "apartment" ? "linear-gradient(135deg, #1a2a3a 0%, #0d1520 100%)" :
-                          prop.property_type === "penthouse" ? "linear-gradient(135deg, #2a1a3a 0%, #150d20 100%)" :
-                          "linear-gradient(135deg, #2a3a1a 0%, #151f0d 100%)"
-                      }}>
-                        <span className="text-4xl opacity-30">
-                          {prop.property_type === "house" ? "🏠" : prop.property_type === "apartment" ? "🏢" : prop.property_type === "penthouse" ? "🏙️" : "🌿"}
-                        </span>
-                      </div>
-                    )}
+                    ) : null}
+                    <div className={`w-full h-full items-center justify-center ${isRealImage(prop.image_url) ? "hidden" : "flex"}`} style={{
+                      background: prop.property_type === "house" ? "linear-gradient(135deg, #1a3a2a 0%, #0d1f15 100%)" :
+                        prop.property_type === "apartment" ? "linear-gradient(135deg, #1a2a3a 0%, #0d1520 100%)" :
+                        prop.property_type === "penthouse" ? "linear-gradient(135deg, #2a1a3a 0%, #150d20 100%)" :
+                        "linear-gradient(135deg, #2a3a1a 0%, #151f0d 100%)"
+                    }}>
+                      <span className="text-4xl opacity-30">
+                        {prop.property_type === "house" ? "🏠" : prop.property_type === "apartment" ? "🏢" : prop.property_type === "penthouse" ? "🏙️" : "🌿"}
+                      </span>
+                    </div>
                     <div className="absolute top-2.5 left-2.5 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-xs font-bold text-white border border-white/10">
                       {formatPrice(prop.price)}
                     </div>
