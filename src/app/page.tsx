@@ -49,15 +49,27 @@ export default function LandingPage() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  const [showAndroidGuide, setShowAndroidGuide] = useState(false);
+
   const handleInstall = async () => {
     if (deferredPrompt) {
-      await deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      if (choice.outcome === "accepted") {
-        setShowInstallBanner(false);
+      try {
+        await deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        if (choice.outcome === "accepted") {
+          setShowInstallBanner(false);
+        }
+      } catch {
+        // prompt may have already been used
       }
       setDeferredPrompt(null);
     } else if (isIOS) {
+      setShowIOSGuide(true);
+    } else if (isMobile) {
+      // Android without deferred prompt — show manual guide
+      setShowAndroidGuide(true);
+    } else {
+      // Desktop — show iOS guide as generic guide
       setShowIOSGuide(true);
     }
   };
@@ -252,6 +264,66 @@ export default function LandingPage() {
               </div>
               <button
                 onClick={() => setShowIOSGuide(false)}
+                className="w-full mt-5 py-2.5 gradient-accent rounded-xl text-[var(--color-bg-primary)] text-sm font-bold"
+              >
+                Entendido
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Android Install Guide Modal */}
+      <AnimatePresence>
+        {showAndroidGuide && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowAndroidGuide(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="glass-card p-6 max-w-sm w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+                  <Smartphone size={18} className="text-[var(--color-accent)]" />
+                  Instalar en Android
+                </h3>
+                <button onClick={() => setShowAndroidGuide(false)} className="text-[var(--color-text-muted)]">
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full gradient-accent flex items-center justify-center text-xs font-bold text-[var(--color-bg-primary)] flex-shrink-0">1</div>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">Abre el menú de Chrome</p>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Toca los 3 puntos ⋮ en la esquina superior derecha</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full gradient-accent flex items-center justify-center text-xs font-bold text-[var(--color-bg-primary)] flex-shrink-0">2</div>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">Instalar aplicación</p>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Selecciona &quot;Instalar app&quot; o &quot;Agregar a pantalla de inicio&quot;</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full gradient-accent flex items-center justify-center text-xs font-bold text-[var(--color-bg-primary)] flex-shrink-0">3</div>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">Confirmar instalación</p>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-0.5">PROPLAB aparecerá como app en tu pantalla de inicio</p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAndroidGuide(false)}
                 className="w-full mt-5 py-2.5 gradient-accent rounded-xl text-[var(--color-bg-primary)] text-sm font-bold"
               >
                 Entendido

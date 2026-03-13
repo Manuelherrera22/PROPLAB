@@ -62,6 +62,19 @@ function typeIcon(t: string) {
   return icons[t] || "🏠";
 }
 
+// Detect MercadoLibre placeholder/logo images
+function isRealImage(url: string | null | undefined): boolean {
+  if (!url || !url.startsWith("http")) return false;
+  const lower = url.toLowerCase();
+  if (lower.includes("resources.mlstatic.com")) return false;
+  if (lower.includes("/resources/")) return false;
+  if (lower.includes("logo")) return false;
+  if (lower.includes("_noimage")) return false;
+  if (lower.includes("no-image")) return false;
+  if (lower.includes("placeholder")) return false;
+  return true;
+}
+
 export default function PropertyDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -128,10 +141,11 @@ export default function PropertyDetailPage() {
   const isBelow = priceDiffPct < -5;
   const isAbove = priceDiffPct > 5;
 
-  // Build gallery: use gallery array if available, otherwise just main image
-  const gallery: string[] = (p.gallery && p.gallery.length > 0)
+  // Build gallery: use gallery array if available, otherwise just main image — filter out ML logos
+  const gallery: string[] = ((p.gallery && p.gallery.length > 0)
     ? p.gallery
-    : (p.image_url && p.image_url.startsWith("http")) ? [p.image_url] : [];
+    : (p.image_url && p.image_url.startsWith("http")) ? [p.image_url] : []
+  ).filter((url: string) => isRealImage(url));
 
   const hasGallery = gallery.length > 0;
   const currentImage = gallery[activeImageIdx] || "";
@@ -176,13 +190,13 @@ export default function PropertyDetailPage() {
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-black/70"
                 >
                   <ChevronLeft size={20} />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm text-white flex items-center justify-center opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-black/70"
                 >
                   <ChevronRight size={20} />
                 </button>

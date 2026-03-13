@@ -5,7 +5,7 @@ import { Settings, Key, Building2, Bell, Palette } from "lucide-react";
 
 export default function SettingsPage() {
   return (
-    <div className="p-6 md:p-8 max-w-3xl mx-auto space-y-6">
+    <div className="p-4 sm:p-6 md:p-8 max-w-3xl mx-auto space-y-6 pt-16 md:pt-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)] flex items-center gap-3">
           <Settings size={24} className="text-[var(--color-accent)]" />
