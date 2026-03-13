@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { Building2, ArrowRight, BarChart3, Brain, Target, Zap } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Building2, ArrowRight, BarChart3, Brain, Target, Zap, Smartphone, Download, X } from "lucide-react";
 
 const features = [
   { icon: BarChart3, title: "Market Intelligence", desc: "Mapa de calor con precios/m² por zona y detector de oportunidades." },
@@ -11,7 +12,52 @@ const features = [
   { icon: Zap, title: "Arbitrage Engine", desc: "Scraping de portales + IA detecta propiedades subvaloradas." },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface BeforeInstallPromptEvent extends Event { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }>; }
+
 export default function LandingPage() {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
+
+  useEffect(() => {
+    const ua = navigator.userAgent;
+    const mobile = /iPhone|iPad|iPod|Android/i.test(ua);
+    const ios = /iPhone|iPad|iPod/i.test(ua);
+    setIsMobile(mobile);
+    setIsIOS(ios);
+
+    if (mobile) {
+      // Show install banner after 2 seconds on mobile
+      const timer = setTimeout(() => setShowInstallBanner(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === "accepted") {
+        setShowInstallBanner(false);
+      }
+      setDeferredPrompt(null);
+    } else if (isIOS) {
+      setShowIOSGuide(true);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden gradient-bg px-4 sm:px-6 py-12 sm:py-0">
       {/* Background effects */}
@@ -62,11 +108,12 @@ export default function LandingPage() {
           Todo en una sola plataforma.
         </motion.p>
 
-        {/* CTA */}
+        {/* CTA Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-3"
         >
           <Link
             href="/dashboard"
@@ -75,6 +122,16 @@ export default function LandingPage() {
             Entrar al Dashboard
             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </Link>
+
+          {/* Mobile Download Button */}
+          <button
+            onClick={handleInstall}
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl border border-[var(--color-border-default)] bg-[var(--color-bg-card)]/80 backdrop-blur-md text-[var(--color-text-primary)] font-semibold text-sm hover:border-[var(--color-accent)]/30 hover:bg-[var(--color-bg-hover)] transition-all duration-300 group"
+          >
+            <Smartphone size={16} className="text-[var(--color-accent)]" />
+            {isMobile ? "Instalar App" : "Descargar en Móvil"}
+            <Download size={14} className="text-[var(--color-text-muted)] group-hover:text-[var(--color-accent)] transition-colors" />
+          </button>
         </motion.div>
       </motion.div>
 
@@ -103,6 +160,102 @@ export default function LandingPage() {
           </motion.div>
         ))}
       </motion.div>
+
+      {/* Mobile Install Banner — slides up on mobile */}
+      <AnimatePresence>
+        {showInstallBanner && isMobile && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="fixed bottom-0 left-0 right-0 z-50 p-4 safe-area-bottom"
+          >
+            <div className="max-w-lg mx-auto rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border-default)] p-4 shadow-2xl backdrop-blur-xl flex items-center gap-4">
+              <div className="w-12 h-12 gradient-accent rounded-xl flex items-center justify-center flex-shrink-0">
+                <Building2 size={22} className="text-[var(--color-bg-primary)]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-[var(--color-text-primary)]">Instala PROPLAB</p>
+                <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5">
+                  Acceso rápido desde tu pantalla de inicio
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={handleInstall}
+                  className="px-4 py-2 gradient-accent rounded-xl text-[var(--color-bg-primary)] text-xs font-bold"
+                >
+                  Instalar
+                </button>
+                <button onClick={() => setShowInstallBanner(false)} className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* iOS Install Guide Modal */}
+      <AnimatePresence>
+        {showIOSGuide && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setShowIOSGuide(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="glass-card p-6 max-w-sm w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-[var(--color-text-primary)] flex items-center gap-2">
+                  <Smartphone size={18} className="text-[var(--color-accent)]" />
+                  Instalar en iPhone
+                </h3>
+                <button onClick={() => setShowIOSGuide(false)} className="text-[var(--color-text-muted)]">
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full gradient-accent flex items-center justify-center text-xs font-bold text-[var(--color-bg-primary)] flex-shrink-0">1</div>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">Toca el botón Compartir</p>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-0.5">El ícono con la flecha hacia arriba ↑ en Safari</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full gradient-accent flex items-center justify-center text-xs font-bold text-[var(--color-bg-primary)] flex-shrink-0">2</div>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">Agregar a Pantalla de Inicio</p>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Desliza hacia abajo y selecciona esta opción</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full gradient-accent flex items-center justify-center text-xs font-bold text-[var(--color-bg-primary)] flex-shrink-0">3</div>
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-text-primary)]">Toca &quot;Agregar&quot;</p>
+                    <p className="text-xs text-[var(--color-text-muted)] mt-0.5">PROPLAB se instalará como una app en tu iPhone</p>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowIOSGuide(false)}
+                className="w-full mt-5 py-2.5 gradient-accent rounded-xl text-[var(--color-bg-primary)] text-sm font-bold"
+              >
+                Entendido
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Version badge */}
       <motion.div
