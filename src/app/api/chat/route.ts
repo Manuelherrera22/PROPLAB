@@ -138,6 +138,24 @@ Mensaje: "${message}"
             title: `📥 Nuevo lead: ${leadData.user_name || "Anónimo"}`,
             message: `Lead capturado via AI Chat. Score: ${Math.min(score, 100)}. Busca: ${leadData.desired_type || "propiedad"} en ${leadData.desired_location || "sin definir"}.`,
           }]);
+
+          // Save search tracking in Radar
+          let parsedMaxPrice = filters.max_price || null;
+          if (leadData.budget_info) {
+             const budgetMatch = leadData.budget_info.match(/[\d,.]+/);
+             if (budgetMatch) parsedMaxPrice = parseFloat(budgetMatch[0].replace(/,/g, ''));
+          }
+
+          await supabase.from("saved_searches").insert([{
+            workspace_id: workspaceId,
+            whatsapp_number: leadData.whatsapp_number,
+            user_name: leadData.user_name,
+            desired_location: leadData.desired_location || filters.location,
+            max_price: parsedMaxPrice,
+            min_bedrooms: filters.min_bedrooms || null,
+            property_type: leadData.desired_type || filters.property_type,
+            status: matchedProperties.length > 0 ? "matched" : "pending"
+          }]);
         }
       } catch (e) {
         console.error("Lead capture error:", e);
